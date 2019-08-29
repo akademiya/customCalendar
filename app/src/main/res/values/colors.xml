@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="normal_day">#8B000000</color>
+    <color name="first_last_day">#303F9F</color>
+    <color name="selected_day_background">#C5CAE9</color>
+    <color name="selected_day_text">#fff2f2f2</color>
+
+    <color name="colorPrimary">#008577</color>
+    <color name="colorPrimaryDark">#00574B</color>
+    <color name="colorAccent">#D81B60</color>
+
+
+
+
+
+    <color name="white">#FFF</color>
+    <color name="normal_date_color">#8B000000</color>
+    <color name="toolbar_color">#303F9F</color>
+    <color name="selected_first_date_background">#303F9F</color>
+    <color name="selected_last_date_background">#303F9F</color>
+    <color name="selected_middle_date_background">#C5CAE9</color>
+    <color name="inactive_date_color">#4D000000</color>
+    <color name="month_text_color">#8B000000</color>
+    <color name="first_date_color">#FFF</color>
+    <color name="last_date_color">#FFF</color>
+    <color name="middle_date_color">#8B000000</color>
+</resources>
