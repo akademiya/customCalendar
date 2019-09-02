@@ -9,8 +9,7 @@ class DateModel {
 
     fun days(): List<Date> {
 
-        val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-        val startDate = calendar.time //formatter.parse(formatter.format(calendar.time))
+        val startDate = calendar.time
         val count = getWeeks() * 7
 
         calendar.set(Calendar.DATE, 1)

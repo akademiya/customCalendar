@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.updatePaddingRelative
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.item_month_calendar.*
@@ -54,12 +55,16 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                 }
-                initialPrefetchItemCount = 100 // <-----
 
             }
-            addItemDecoration(SpacesItemDecoration(spacingInPixels))
+            addItemDecoration(object : RecyclerView.ItemDecoration() {
+                override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: RecyclerView.State) {
+                    outRect.bottom = spacingInPixels
+                }
+            })
+            this.scrollToPosition(adapter!!.itemCount-1)
+//            addItemDecoration(SpacesItemDecoration(spacingInPixels))
             setHasFixedSize(true)
-//            setItemViewCacheSize(100)
         }
     }
 
@@ -67,13 +72,6 @@ class MainActivity : AppCompatActivity() {
     inner class SpacesItemDecoration(private val space: Int) : RecyclerView.ItemDecoration() {
         override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: RecyclerView.State) {
             outRect.bottom = space
-
-            /** Add top margin only for the first item to avoid double space between items*/
-            if (parent.getChildLayoutPosition(view) == 0) {
-                outRect.top = space
-            } else {
-                outRect.top = 0
-            }
         }
     }
 

@@ -2,6 +2,7 @@ package adv.vadym.com.verticalrecyclercalendar
 
 import android.content.Context
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -47,7 +48,7 @@ class CalendarAdapter(val context: Context, val onDateClickListener: (Date) -> U
     init {
         //FIXME: Refactor
         val dateManager = DateModel()
-        items = (0 until 24)
+        items = (24 downTo 0)
             .map {
                 val days = dateManager.days()
                 val newItems = mutableListOf<Item>()
@@ -86,8 +87,8 @@ class CalendarAdapter(val context: Context, val onDateClickListener: (Date) -> U
             TextView(context).apply {
                 //FIXME: Rewrite
                 val display = (context.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay
-                val cellWidth = (display.width + 4) / 7
-                layoutParams = ViewGroup.LayoutParams(cellWidth, cellWidth)
+                val cellWidth = (display.width) / 7
+                layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, cellWidth)
                 gravity = Gravity.CENTER
             },
             onDateClickListener
@@ -100,11 +101,7 @@ class CalendarAdapter(val context: Context, val onDateClickListener: (Date) -> U
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) = when (holder) {
         is ViewHolder.MonthTitleViewHolder -> holder.bind(items[position] as Item.MonthTitle)
-        is ViewHolder.DayViewHolder -> {
-            val day = items[position] as Item.MonthDay
-            holder.bind(day)
-
-        }
+        is ViewHolder.DayViewHolder -> holder.bind(items[position] as Item.MonthDay)
         is ViewHolder.EmptyDayViewHolder -> { }
     }
 
@@ -115,7 +112,6 @@ class CalendarAdapter(val context: Context, val onDateClickListener: (Date) -> U
         if (positionFirst == -1) {
             return
         }
-
 
         items = when {
             positionFirst == positionLast -> {
@@ -133,16 +129,20 @@ class CalendarAdapter(val context: Context, val onDateClickListener: (Date) -> U
     private fun  List<Item>.selectRange(positionFrom: Int, positionTo: Int): List<Item> {
         val newList = items.toMutableList()
 
-
         (positionFrom until positionTo+1).forEach{ index ->
             val item = newList[index] as? Item.MonthDay
             if(item != null){
                 newList[index] = item.copy(
-                    selectionType = when (index) {
-                        positionFrom -> SelectionType.FIRST
-                        positionTo -> SelectionType.LAST
-                        else -> SelectionType.MIDDLE
+                    selectionType = if (item.isEnabled) {
+                        when (index) {
+                            positionFrom -> SelectionType.FIRST
+                            positionTo -> SelectionType.LAST
+                            else -> SelectionType.MIDDLE
+                        }
+                    } else {
+                        SelectionType.NONE
                     }
+
                 )
                 listSelectedCells.add(index) //FIXME: Side effect
             }
@@ -228,15 +228,14 @@ class CalendarAdapter(val context: Context, val onDateClickListener: (Date) -> U
                     isEnabled = day.isEnabled
                     text = day.name
 
-
                     if(day.isEnabled) {
                         when (day.selectionType) {
-                            SelectionType.FIRST,
                             SelectionType.SINGLE,
+                            SelectionType.FIRST,
                             SelectionType.LAST -> Color.WHITE
                             else -> Color.BLACK
                         }.let(::setTextColor)
-                    }
+                    } else setTextColor(Color.LTGRAY)
 
                     background = when (day.selectionType) {
                         SelectionType.SINGLE -> {
