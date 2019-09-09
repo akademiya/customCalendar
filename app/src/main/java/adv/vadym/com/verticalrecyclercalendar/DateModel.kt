@@ -17,7 +17,7 @@ class DateModel {
         calendar.add(Calendar.DATE, -dayOfWeek)
 
         val days = ArrayList<Date>()
-        for (i in 0 until count) {
+        for (i in -1 until count) {
             days.add(calendar.time)
             calendar.add(Calendar.DATE, 1)
         }
