@@ -2,7 +2,6 @@ package adv.vadym.com.verticalrecyclercalendar
 
 import android.content.Context
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -11,7 +10,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
+
 
 /**
  * USE CASES
@@ -48,7 +47,7 @@ class CalendarAdapter(val context: Context, val onDateClickListener: (Date) -> U
     init {
         //FIXME: Refactor
         val dateManager = DateModel()
-        items = (24 downTo 0)
+        items = (0 until 24)
             .map {
                 val days = dateManager.days()
                 val newItems = mutableListOf<Item>()
@@ -72,8 +71,19 @@ class CalendarAdapter(val context: Context, val onDateClickListener: (Date) -> U
 
                 dateManager.prevMonth()
                 newItems
-            }
+            }.run { reverse(this) }
             .flatten()
+    }
+
+    private fun <T> reverse(list: List<T>): List<T> {
+        val result = ArrayList<T>(list.size)
+
+        for (i in list.size - 1 downTo 0) {
+            val element = list[i]
+            result.add(element)
+        }
+
+        return result
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = when (viewType) {
