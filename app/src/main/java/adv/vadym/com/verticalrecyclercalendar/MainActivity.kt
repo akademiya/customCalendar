@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.updatePaddingRelative
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.item_month_calendar.*
@@ -63,15 +62,7 @@ class MainActivity : AppCompatActivity() {
                 }
             })
             this.scrollToPosition(adapter!!.itemCount-1)
-//            addItemDecoration(SpacesItemDecoration(spacingInPixels))
             setHasFixedSize(true)
-        }
-    }
-
-
-    inner class SpacesItemDecoration(private val space: Int) : RecyclerView.ItemDecoration() {
-        override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: RecyclerView.State) {
-            outRect.bottom = space
         }
     }
 
