@@ -2,7 +2,7 @@ package adv.vadym.com.verticalrecyclercalendar
 
 import java.util.*
 
-data class LDate(val year: Int, val month: Int, val day: Int) {
+data class CalendarDay(val year: Int, val month: Int, val day: Int) {
 
     private val calendar: Calendar = Calendar.getInstance()
 
@@ -12,6 +12,10 @@ data class LDate(val year: Int, val month: Int, val day: Int) {
 
     fun getDate() : Date {
         return calendar.time
+    }
+
+    fun getSelectedDates() : List<CalendarDay> {
+        return emptyList()
     }
 
 

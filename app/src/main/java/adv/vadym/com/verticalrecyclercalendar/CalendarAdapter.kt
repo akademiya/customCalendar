@@ -20,13 +20,18 @@ import kotlin.collections.ArrayList
 
 
 
-class CalendarAdapter(val context: Context, val onDateClickListener: (LDate) -> Unit) : RecyclerView.Adapter<CalendarAdapter.ViewHolder>() {
+class CalendarAdapter(val context: Context, val onDateClickListener: (CalendarDay) -> Unit) : RecyclerView.Adapter<CalendarAdapter.ViewHolder>() {
     private var items = emptyList<Item>()
     private val listSelectedCells = ArrayList<Int>()
+    val selectedDatesList = ArrayList<CalendarDay>()
 
-    fun getSelectedDates() : ArrayList<Int> {
-        return listSelectedCells
-    }
+    var monthTitleViewHeight = 0
+    var monthTitleTextSize = 0F
+    var monthTitleTextColor = 0
+
+//    fun getSelectedDates() : ArrayList<CalendarDay> {
+//        return selectedDatesList
+//    }
 
     init {
         //FIXME: Refactor
@@ -48,7 +53,7 @@ class CalendarAdapter(val context: Context, val onDateClickListener: (LDate) -> 
                             name = dateFormat.format(it),
                             isEnabled = !dateManager.isFutureDays(it),
                             selectionType = SelectionType.NONE,
-                            date = LDate(
+                            date = CalendarDay(
                                 day = calendar.get(Calendar.DAY_OF_MONTH),
                                 month = calendar.get(Calendar.MONTH),
                                 year = calendar.get(Calendar.YEAR)
@@ -78,9 +83,10 @@ class CalendarAdapter(val context: Context, val onDateClickListener: (LDate) -> 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = when (viewType) {
         MONTH_TITLE_VIEW_TYPE -> ViewHolder.MonthTitleViewHolder(TextView(context).apply {
             //FIXME: Rewrite
-            layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, CELL_HEIGHT)
+            layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,  monthTitleViewHeight)
             gravity = Gravity.CENTER
-            textSize = 25F
+            textSize = monthTitleTextSize
+            setTextColor(monthTitleTextColor)
         })
         DAY_VIEW_TYPE -> ViewHolder.DayViewHolder(
             TextView(context).apply {
@@ -105,7 +111,7 @@ class CalendarAdapter(val context: Context, val onDateClickListener: (LDate) -> 
     }
 
 
-    fun selectDate(startDate: LDate, endDate: LDate) {
+    fun selectDate(startDate: CalendarDay, endDate: CalendarDay) {
         resetOldSelectedItems()
         val (positionFirst, positionLast) = initializedSelectedPositions(startDate, endDate)
         if (positionFirst == -1) {
@@ -144,13 +150,14 @@ class CalendarAdapter(val context: Context, val onDateClickListener: (LDate) -> 
 
                 )
                 listSelectedCells.add(index) //FIXME: Side effect
+                selectedDatesList.add(CalendarDay(item.date.year, item.date.month, item.date.day))
             }
         }
 
         return newList
     }
 
-    private fun initializedSelectedPositions(startDate: LDate, endDate: LDate): Pair<Int, Int> {
+    private fun initializedSelectedPositions(startDate: CalendarDay, endDate: CalendarDay): Pair<Int, Int> {
         val positionFirst = items.indexOfFirst {
             it is Item.MonthDay && it.date == startDate
         }
@@ -195,7 +202,7 @@ class CalendarAdapter(val context: Context, val onDateClickListener: (LDate) -> 
             val name: String,
             val isEnabled: Boolean,
             val selectionType: SelectionType,
-            val date: LDate
+            val date: CalendarDay
         ) : Item() {
             val isSelected: Boolean
                 get() = selectionType != SelectionType.NONE
@@ -214,8 +221,8 @@ class CalendarAdapter(val context: Context, val onDateClickListener: (LDate) -> 
             }
         }
 
-        class DayViewHolder(itemView: View, onDateClickListener: (LDate) -> Unit) : ViewHolder(itemView) {
-            private var date: LDate? = null
+        class DayViewHolder(itemView: View, onDateClickListener: (CalendarDay) -> Unit) : ViewHolder(itemView) {
+            private var date: CalendarDay? = null
 
             init {
                 itemView.setOnClickListener{

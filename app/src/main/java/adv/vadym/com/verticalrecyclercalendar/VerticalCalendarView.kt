@@ -8,12 +8,11 @@ import android.util.AttributeSet
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
+import android.view.WindowManager
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -21,18 +20,16 @@ class VerticalCalendarView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : FrameLayout(context, attrs, defStyleAttr) {
+) : LinearLayout(context, attrs, defStyleAttr) {
 
-    private val DEFAULT_MONTH_NAME_COLOR = Color.RED
-    private val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-    private var lastSelectedDate: LDate? = null
+    private var lastSelectedDate: CalendarDay? = null
     private val spacingInPixels = resources.getDimensionPixelSize(R.dimen.spaceBottom)
 
-    private val listCalendar = ArrayList<LDate>()
+    private val selectedDatesList = ArrayList<CalendarDay>()
 
     private val calendarAdapter: CalendarAdapter by lazy {
         CalendarAdapter(context) {
-            val dateFrom = lastSelectedDate ?: it //formatter.parse(formatter.format(it))
+            val dateFrom = lastSelectedDate ?: it
             val dateTo = it.takeIf { lastSelectedDate != null }
 
             calendarAdapter.selectDate(dateFrom, dateTo ?: dateFrom)
@@ -76,40 +73,69 @@ class VerticalCalendarView @JvmOverloads constructor(
             resources.getDimensionPixelSize(R.dimen.header_month_height)
         )
         gravity = Gravity.CENTER_VERTICAL
-        background = ColorDrawable(Color.RED)
+        val display = (context.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay
+        val cellWidth = display.width / 7
         addView(TextView(context).apply {
-            text = "Su"
-            gravity = Gravity.CENTER_VERTICAL
+            text = resources.getString(R.string.sun)
+            minWidth = cellWidth
+            gravity = Gravity.CENTER
         })
         addView(TextView(context).apply {
-            text = "Mo"
-            gravity = Gravity.CENTER_VERTICAL
+            text = resources.getString(R.string.mon)
+            minWidth = cellWidth
+            gravity = Gravity.CENTER
         })
         addView(TextView(context).apply {
-            text = "Tu"
-            gravity = Gravity.CENTER_VERTICAL
+            text = resources.getString(R.string.tue)
+            minWidth = cellWidth
+            gravity = Gravity.CENTER
         })
+        addView(TextView(context).apply {
+            text = resources.getString(R.string.wed)
+            minWidth = cellWidth
+            gravity = Gravity.CENTER
+        })
+        addView(TextView(context).apply {
+            text = resources.getString(R.string.thu)
+            minWidth = cellWidth
+            gravity = Gravity.CENTER
+        })
+        addView(TextView(context).apply {
+            text = resources.getString(R.string.fri)
+            minWidth = cellWidth
+            gravity = Gravity.CENTER
+        })
+        addView(TextView(context).apply {
+            text = resources.getString(R.string.sat)
+            minWidth = cellWidth
+            gravity = Gravity.CENTER
+        })
+    }
+
+    private val divider = LinearLayout(context).apply {
+        layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, resources.getDimensionPixelSize(R.dimen.divider_height))
+        background = ColorDrawable(Color.LTGRAY)
     }
 
 
     init {
+        orientation = VERTICAL
         addView(headerView)
+        addView(divider)
         addView(recyclerView)
 
         attrs?.let {
             val typedArray = context.obtainStyledAttributes(it, R.styleable.AttrCalendarView, 0, 0)
-//            calendarAdapter.setMonthColor(typedArray.getColor(R.styleable.AttrCalendarView_colorMonthName, DEFAULT_MONTH_NAME_COLOR))
-//            loyCalendar.monthColor = typedArray.getColor(
-//                R.styleable.AttrCalendarView_colorMonthName,
-//                DEFAULT_MONTH_NAME_COLOR
-//            )
-
+            calendarAdapter.monthTitleViewHeight = typedArray.getDimensionPixelSize(R.styleable.AttrCalendarView_monthTitleViewHeight, resources.getDimensionPixelSize(R.dimen.month_title_view_height))
+            calendarAdapter.monthTitleTextSize = typedArray.getDimension(R.styleable.AttrCalendarView_textSizeMonth, resources.getDimension(R.dimen.text_size_month))
+            calendarAdapter.monthTitleTextColor = typedArray.getColor(R.styleable.AttrCalendarView_colorMonthName, resources.getColor(R.color.colorAccent))
         }
 
     }
 
-    fun getSelectedDates(): List<LDate> {
-        return emptyList()
+    fun getSelectedDates(): List<CalendarDay> {
+        val result = ArrayList<CalendarDay>()
+        return calendarAdapter.selectedDatesList
     }
 
 }

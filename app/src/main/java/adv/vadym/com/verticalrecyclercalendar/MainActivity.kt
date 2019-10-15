@@ -5,6 +5,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
+import kotlin.NoSuchElementException
 
 
 class MainActivity : AppCompatActivity() {
@@ -22,8 +23,10 @@ class MainActivity : AppCompatActivity() {
             dates.sort()
         }
 
-        calendarView.getSelectedDates()
-
-        tv_selected_period.text = calendarView.getSelectedDates().toString()
+        tv_selected_period.text = try {
+            ""
+        } catch (e: NoSuchElementException) {
+            "no element"
+        }
     }
 }

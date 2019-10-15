@@ -51,5 +51,7 @@
             android:id="@+id/calendarView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:colorMonthName="#FF0000" />
+            app:colorMonthName="#FF0000"
+            app:textSizeMonth="10sp"
+            app:monthTitleViewHeight="48dp"/>
 </LinearLayout>
