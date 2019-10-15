@@ -1,69 +1,29 @@
 package adv.vadym.com.verticalrecyclercalendar
 
-import android.graphics.Rect
 import android.os.Bundle
-import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.item_month_calendar.*
-import java.text.SimpleDateFormat
+import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
 
-    private val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-    private var lastSelectedDate: Date? = null
-    private lateinit var newCalendarAdapter: CalendarAdapter
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.item_month_calendar)
-        setSupportActionBar(toolbar)
+        setContentView(R.layout.activity_main)
 
-        newCalendarAdapter = CalendarAdapter(this) {
-            val dateFrom = lastSelectedDate ?: formatter.parse(formatter.format(it))
-            val dateTo = formatter.parse(formatter.format(it)).takeIf { lastSelectedDate != null }
-
-            newCalendarAdapter.selectDate(dateFrom, dateTo ?: dateFrom)
-            lastSelectedDate = dateFrom?.takeIf { dateTo == null }
+        if (calendarView.getSelectedDates().isEmpty())
+            Toast.makeText(this, resources.getString(R.string.app_name), Toast.LENGTH_SHORT).show()
+        else {
+            val dates = ArrayList<Date>()
+            for (calendarDay in calendarView.getSelectedDates())
+                dates.add(calendarDay.getDate())
+            dates.sort()
         }
 
-        btn_back.setOnClickListener {
-            Toast.makeText(this, "Click back arrow", Toast.LENGTH_SHORT).show()
-        }
+        calendarView.getSelectedDates()
 
-        btn_apply.setOnClickListener {
-            Toast.makeText(this, "Click apply button", Toast.LENGTH_SHORT).show()
-        }
-        val spacingInPixels = resources.getDimensionPixelSize(R.dimen.spaceBottom)
-
-        calendar.apply {
-            adapter = newCalendarAdapter
-
-            layoutManager = GridLayoutManager(context, 7, RecyclerView.VERTICAL, false).apply {
-                spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
-                    override fun getSpanSize(position: Int): Int {
-                        return when (newCalendarAdapter.getItemViewType(position)) {
-                            CalendarAdapter.EMPTY_DAY_VIEW_TYPE,
-                            CalendarAdapter.DAY_VIEW_TYPE -> 1
-                            CalendarAdapter.MONTH_TITLE_VIEW_TYPE -> 7
-                            else -> -1
-                        }
-                    }
-                }
-
-            }
-            addItemDecoration(object : RecyclerView.ItemDecoration() {
-                override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: RecyclerView.State) {
-                    outRect.bottom = spacingInPixels
-                }
-            })
-            this.scrollToPosition(adapter!!.itemCount-1)
-            setHasFixedSize(true)
-        }
+        tv_selected_period.text = calendarView.getSelectedDates().toString()
     }
-
 }

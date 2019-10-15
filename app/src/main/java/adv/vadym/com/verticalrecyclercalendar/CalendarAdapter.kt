@@ -10,43 +10,28 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 /**
  * USE CASES
-
- * @param oldStart - дата начала периода до взаимодействия пользователя с календарем
- * @param oldEnd - дата конца периода до взаимодействия пользователя с календарем
- * @param newStart - дата начала периода, после клика на дату в календаре
- * @param newEnd - дата конца периода, после клика на дату в календаре
- * @param DateClicked - дата, на которую кликает пользователь
- *
- * 16-072-04-1 Если с момента открытия календаря следующий клик по календарю будет нечетным,
- * и кликнуть DateClicked,
- * то newStart = newEnd = DateClicked.
-
- * 16-072-04-2 Если с момента открытия календаря следующий клик по календарю будет четным,
- * и кликнуть DateClicked,
- * и DateClicked < oldStart,
- * то newStart = DateClicked и newEnd = oldEnd
-
- * 16-072-04-3 Если с момента открытия календаря следующий клик по календарю будет четным,
- * и кликнуть DateClicked
- * и DateClicked > oldStart,
- * то newStart = oldStart и newEnd = DateClicked
-
  * @author https://docs.google.com/document/d/1IgWlYvYVY_r9l98jcyJvLTBEeN-Nz-_g6wrIoEsFiYw/edit#
  */
 
 
 
-class CalendarAdapter(val context: Context, val onDateClickListener: (Date) -> Unit) : RecyclerView.Adapter<CalendarAdapter.ViewHolder>() {
+class CalendarAdapter(val context: Context, val onDateClickListener: (LDate) -> Unit) : RecyclerView.Adapter<CalendarAdapter.ViewHolder>() {
     private var items = emptyList<Item>()
     private val listSelectedCells = ArrayList<Int>()
+
+    fun getSelectedDates() : ArrayList<Int> {
+        return listSelectedCells
+    }
 
     init {
         //FIXME: Refactor
         val dateManager = DateModel()
+        val calendar = Calendar.getInstance()
         items = (0 until 24)
             .map {
                 val days = dateManager.days()
@@ -57,13 +42,17 @@ class CalendarAdapter(val context: Context, val onDateClickListener: (Date) -> U
 
                 val monthDays = days.map {
                     val dateFormat = SimpleDateFormat("dd", Locale.US)
-                    val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.US)
                     if(dateManager.isCurrentMonth(it)){
+                        calendar.time = it
                         Item.MonthDay(
                             name = dateFormat.format(it),
                             isEnabled = !dateManager.isFutureDays(it),
                             selectionType = SelectionType.NONE,
-                            date = formatter.parse(formatter.format(it))
+                            date = LDate(
+                                day = calendar.get(Calendar.DAY_OF_MONTH),
+                                month = calendar.get(Calendar.MONTH),
+                                year = calendar.get(Calendar.YEAR)
+                            )
                         )
                     } else Item.EmptyDay
                 }
@@ -116,7 +105,7 @@ class CalendarAdapter(val context: Context, val onDateClickListener: (Date) -> U
     }
 
 
-    fun selectDate(startDate: Date, endDate: Date) {
+    fun selectDate(startDate: LDate, endDate: LDate) {
         resetOldSelectedItems()
         val (positionFirst, positionLast) = initializedSelectedPositions(startDate, endDate)
         if (positionFirst == -1) {
@@ -161,7 +150,7 @@ class CalendarAdapter(val context: Context, val onDateClickListener: (Date) -> U
         return newList
     }
 
-    private fun initializedSelectedPositions(startDate: Date, endDate: Date): Pair<Int, Int> {
+    private fun initializedSelectedPositions(startDate: LDate, endDate: LDate): Pair<Int, Int> {
         val positionFirst = items.indexOfFirst {
             it is Item.MonthDay && it.date == startDate
         }
@@ -206,7 +195,7 @@ class CalendarAdapter(val context: Context, val onDateClickListener: (Date) -> U
             val name: String,
             val isEnabled: Boolean,
             val selectionType: SelectionType,
-            val date: Date
+            val date: LDate
         ) : Item() {
             val isSelected: Boolean
                 get() = selectionType != SelectionType.NONE
@@ -218,12 +207,15 @@ class CalendarAdapter(val context: Context, val onDateClickListener: (Date) -> U
     sealed class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         class MonthTitleViewHolder(itemView: View) : ViewHolder(itemView) {
             fun bind(month: Item.MonthTitle) {
-                (itemView as TextView).text = month.name
+                (itemView as TextView).apply {
+                    text = month.name
+//                    setTextColor(month.nameColor)
+                }
             }
         }
 
-        class DayViewHolder(itemView: View, onDateClickListener: (Date) -> Unit) : ViewHolder(itemView) {
-            private var date: Date? = null
+        class DayViewHolder(itemView: View, onDateClickListener: (LDate) -> Unit) : ViewHolder(itemView) {
+            private var date: LDate? = null
 
             init {
                 itemView.setOnClickListener{
